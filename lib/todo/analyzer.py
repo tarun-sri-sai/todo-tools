@@ -72,7 +72,60 @@ class TodoAnalyzer:
 
         return history_start_date, history_end_date
 
-    def get_tasks(self, from_date_str=None, to_date_str=None):
+    def _get_stats(self, tasks, end_date):
+        task_data = []
+        for task_id, task in tasks.items():
+            task_end_date = (
+                self._try_parse_date(task["end_date"])
+                if "end_date" in task
+                else end_date
+            )
+            task_start_date = self._try_parse_date(task["start_date"])
+
+            task_data.append({
+                "task_id": task_id,
+                "duration": (task_end_date - task_start_date).days,
+                "updates": task["updates"],
+                "category": task["category"],
+            })
+
+        category_updates = {}
+        for task in task_data:
+            category = task["category"]
+            category_updates[category] = (
+                category_updates.get(category, 0) +
+                len(task["updates"])
+            )
+
+        def duration_key(x): return x["duration"]
+        def updates_key(x): return x["updates"]
+        half_len = len(task_data) // 2
+
+        total_tasks = len(task_data)
+
+        longest_task = max(task_data, key=duration_key)
+
+        average_task_duration = (
+            sum(task["duration"] for task in task_data) /
+            max(len(task_data), 1)
+        )
+
+        median_task = sorted(task_data, key=duration_key)[half_len]
+
+        most_active_task = max(task_data, key=updates_key)
+
+        most_active_category = max(category_updates, key=category_updates.get)
+
+        return {
+            "total_tasks": total_tasks,
+            "longest_task_id": longest_task["task_id"],
+            "average_task_duration": average_task_duration,
+            "median_task_duration": median_task["duration"],
+            "most_active_task_id": most_active_task["task_id"],
+            "most_active_category": most_active_category
+        }
+
+    def _get_tasks_by_date(self, from_date_str=None, to_date_str=None):
         history_start_date, history_end_date = self._get_date_range(
             from_date_str,
             to_date_str
@@ -128,7 +181,17 @@ class TodoAnalyzer:
                     f"commit {commit} - error parsing {self._TODO_FILE}: {e}"
                 )
                 logging.debug(traceback.format_exc())
+        
         return tasks
+
+    def get_tasks(self, from_date_str=None, to_date_str=None):
+        _, history_end_date = self._get_date_range(from_date_str, to_date_str)
+        tasks = self._get_tasks_by_date(from_date_str, to_date_str)
+
+        return {
+            "tasks": tasks,
+            "stats": self._get_stats(tasks, history_end_date)
+        }
 
     def _get_tasks_by_min_days(self, tasks, min_days=0):
         return {
@@ -140,20 +203,36 @@ class TodoAnalyzer:
             ).days >= min_days
         }
 
-    def get_abandoned_tasks(self, from_date_str=None, to_date_str=None, min_days=0):
-        tasks = self.get_tasks(from_date_str, to_date_str)
-        abandoned_tasks = {
+    def get_abandoned_tasks(
+        self, from_date_str=None, to_date_str=None, min_days=0
+    ):
+        _, history_end_date = self._get_date_range(from_date_str, to_date_str)
+        tasks = self._get_tasks_by_date(from_date_str, to_date_str)
+
+        abandoned_tasks = self._get_tasks_by_min_days({
             task_id: task
             for task_id, task in tasks.items()
             if task.get("abandoned", False)
-        }
-        return self._get_tasks_by_min_days(abandoned_tasks, min_days)
+        }, min_days)
 
-    def get_finished_tasks(self, from_date_str=None, to_date_str=None, min_days=0):
-        tasks = self.get_tasks(from_date_str, to_date_str)
-        finished_tasks = {
+        return {
+            "stats": self._get_stats(abandoned_tasks, history_end_date),
+            "tasks": abandoned_tasks
+        }
+
+    def get_finished_tasks(
+        self, from_date_str=None, to_date_str=None, min_days=0
+    ):
+        _, history_end_date = self._get_date_range(from_date_str, to_date_str)
+        tasks = self._get_tasks_by_date(from_date_str, to_date_str)
+
+        finished_tasks = self._get_tasks_by_min_days({
             task_id: task
             for task_id, task in tasks.items()
             if task.get("finished", False)
+        }, min_days)
+
+        return {
+            "stats": self._get_stats(finished_tasks, history_end_date),
+            "tasks": finished_tasks
         }
-        return self._get_tasks_by_min_days(finished_tasks, min_days)
