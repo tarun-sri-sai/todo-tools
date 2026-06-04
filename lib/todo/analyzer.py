@@ -73,6 +73,16 @@ class TodoAnalyzer:
         return history_start_date, history_end_date
 
     def _get_stats(self, tasks, end_date):
+        if not tasks:
+            return {
+                "total_tasks": 0,
+                "longest_task_id": "",
+                "average_task_duration": 0,
+                "median_task_duration": 0,
+                "most_active_task_id": "",
+                "most_active_category": ""
+            }
+
         task_data = []
         for task_id, task in tasks.items():
             task_end_date = (
