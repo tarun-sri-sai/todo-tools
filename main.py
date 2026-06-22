@@ -24,18 +24,15 @@ def cmd_check(args):
     try:
         with open(args.file, "r") as f:
             contents = f.read()
-    except Exception as e:
-        print("fatal: unable to read file")
+    except Exception:
         return 1
 
     try:
         parse_todo(contents)
-        print("valid syntax")
         return 0
-    except TodoParserError as e:
-        print(f"invalid syntax: {e}")
+    except TodoParserError:
         return 2
-    
+
 
 def update_analyze_subparsers(subparsers):
     # Analyze get-tasks
@@ -109,7 +106,6 @@ def cmd_analyze(args):
     if args.analyze_command == "get-tasks":
         try:
             tasks = analyzer.get_tasks(args.from_date, args.to_date)
-            print(f"tasks in date range {args.from_date} to {args.to_date}:")
             print(json.dumps(tasks, indent=2))
         except TodoAnalyzerError as e:
             logging.critical(f"error getting tasks: {e}")
@@ -123,10 +119,6 @@ def cmd_analyze(args):
                 args.to_date,
                 args.min_days
             )
-            print(
-                f"abandoned tasks in date range {args.from_date} to "
-                f"{args.to_date} with min days {args.min_days}:"
-            )
             print(json.dumps(tasks, indent=2))
         except TodoAnalyzerError as e:
             logging.critical(f"error getting abandoned tasks: {e}")
@@ -139,10 +131,6 @@ def cmd_analyze(args):
                 args.from_date,
                 args.to_date,
                 args.min_days
-            )
-            print(
-                f"finished tasks in date range {args.from_date} to "
-                f"{args.to_date} with min days {args.min_days}:"
             )
             print(json.dumps(tasks, indent=2))
         except TodoAnalyzerError as e:
