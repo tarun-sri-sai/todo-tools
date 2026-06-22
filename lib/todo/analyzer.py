@@ -35,7 +35,7 @@ class TodoAnalyzer:
             try:
                 self._history[self._try_parse_date(message)] = commit.hexsha
             except TodoAnalyzerError:
-                logging.warning(
+                logging.debug(
                     f"commit {sha} - invalid date format: {message}"
                 )
 
@@ -182,12 +182,12 @@ class TodoAnalyzer:
                         task["abandoned"] = True
                         task["end_date"] = commit_obj.message.strip()
             except TodoParserError:
-                logging.warning(
+                logging.debug(
                     f"commit {commit} - failed to parse {self._TODO_FILE}"
                 )
                 logging.debug(traceback.format_exc())
             except Exception as e:
-                logging.warning(
+                logging.debug(
                     f"commit {commit} - error parsing {self._TODO_FILE}: {e}"
                 )
                 logging.debug(traceback.format_exc())

@@ -112,7 +112,7 @@ def _validate_block_data(block_data):
         raise TodoParserError("empty todo")
 
     if "category" not in block_data[0]:
-        logging.warning("first block must be a category")
+        logging.debug("first block must be a category")
 
     _validate_parents(block_data)
 
