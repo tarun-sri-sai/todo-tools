@@ -158,14 +158,18 @@ def cmd_mcp(args):
             to_date: str | None = None
         ) -> str:
             """
-            Get all tasks for a date range.
+            Get all tasks and aggregate stats for a date range.
 
             Args:
-                from_date: Start date in YYYY-MM-DD format (optional)
-                to_date: End date in YYYY-MM-DD format (optional)
+                from_date: Start date in YYYY-MM-DD format. If omitted, the
+                    earliest available commit date is used.
+                to_date: End date in YYYY-MM-DD format. If omitted, the latest
+                    available commit date is used.
 
             Returns:
-                JSON string containing all tasks in the date range
+                JSON string.
+                Success shape: {"tasks": {...}, "stats": {...}}.
+                Error shape: {"error": "<message>"}.
             """
             try:
                 tasks = analyzer.get_tasks(from_date, to_date)
@@ -180,15 +184,21 @@ def cmd_mcp(args):
             min_days: int = 0
         ) -> str:
             """
-            Get abandoned tasks for a date range.
+            Get abandoned tasks and aggregate stats for a date range.
 
             Args:
-                from_date: Start date in YYYY-MM-DD format (optional)
-                to_date: End date in YYYY-MM-DD format (optional)
-                min_days: Minimum number of days a task was tracked (default: 0)
+                from_date: Start date in YYYY-MM-DD format. If omitted, the
+                    earliest available commit date is used.
+                to_date: End date in YYYY-MM-DD format. If omitted, the latest
+                    available commit date is used.
+                min_days: Minimum lifetime in days between start_date and
+                    end_date for each returned task (default: 0).
 
             Returns:
-                JSON string containing abandoned tasks in the date range
+                JSON string.
+                Success shape: {"tasks": {...}, "stats": {...}} where tasks
+                only include abandoned entries.
+                Error shape: {"error": "<message>"}.
             """
             try:
                 tasks = analyzer.get_abandoned_tasks(
@@ -207,15 +217,21 @@ def cmd_mcp(args):
             min_days: int = 0
         ) -> str:
             """
-            Get finished tasks for a date range.
+            Get finished tasks and aggregate stats for a date range.
 
             Args:
-                from_date: Start date in YYYY-MM-DD format (optional)
-                to_date: End date in YYYY-MM-DD format (optional)
-                min_days: Minimum number of days a task was tracked (default: 0)
+                from_date: Start date in YYYY-MM-DD format. If omitted, the
+                    earliest available commit date is used.
+                to_date: End date in YYYY-MM-DD format. If omitted, the latest
+                    available commit date is used.
+                min_days: Minimum lifetime in days between start_date and
+                    end_date for each returned task (default: 0).
 
             Returns:
-                JSON string containing finished tasks in the date range
+                JSON string.
+                Success shape: {"tasks": {...}, "stats": {...}} where tasks
+                only include finished entries.
+                Error shape: {"error": "<message>"}.
             """
             try:
                 tasks = analyzer.get_finished_tasks(
