@@ -1,0 +1,15 @@
+{
+  "servers": {
+    "todo-mcp": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "main.py",
+        "mcp",
+        "to-do"
+      ]
+    }
+  },
+  "inputs": []
+}
