@@ -1,5 +1,8 @@
 # To-do Tools
 
+> [!IMPORTANT]
+> This project is no longer maintained in favor of [tarun-sri-sai/knotwork](https://github.com/tarun-sri-sai/knotwork).
+
 This repository contains a set of tools to check to-do syntax, analyze to-do history and provides an MCP server for LLM-friendly insights.
 
 ## Syntax
